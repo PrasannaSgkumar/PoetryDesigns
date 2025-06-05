@@ -1,0 +1,30 @@
+from django.urls import path
+from .views import *
+urlpatterns = [
+    path('login/superadmin/', SuperAdminLoginAPIView.as_view(), name='superadmin-login'),
+    path('login/user/', UserLoginAPIView.as_view(), name='user-login'),
+    path('login/client/', ClientLoginAPIView.as_view(), name='client-login'),
+    path('departments/', departmentview.as_view(), name="department" ),
+    path('department/<int:id>/', departmentdetailview.as_view(), name="department-detail"),
+    path('roles/', Roleview.as_view(), name="roles" ),
+    path('role/<int:id>/', Roledetailview.as_view(), name="role-detail"),
+    path('users/', userview.as_view(), name="users" ),
+    path('user/<int:id>/', userdetailview.as_view(), name="user-detail"),
+    path('clients/', clientview.as_view(), name="client" ),
+    path('client/<int:id>/', clientdetailview.as_view(), name="client-detail"),
+    path('projects', Projectview.as_view(), name="projects" ),
+    path('project/<int:id>/', projectdetailview.as_view(), name="project-detail"),
+    path('typeshouses', CreateHouseWithImages.as_view(), name="typeshouses" ),
+    path('typeshouses/<int:id>/', Typesofhouses.as_view(), name="typeshouses-detail"),
+    path('stages', stages.as_view(), name="stages"),
+    path('stages/<int:id>/', stagesdetails.as_view(), name="stage-detail"),
+    path('leads', leadsregistration.as_view(), name="leads"),
+    path('leads/<int:id>/', leadsdetail.as_view(), name="leads-detail"),
+    path('construction_details/', ConstructionDetailList.as_view(), name='construction-detail-list'),
+    path('construction_details/<int:id>/', ConstructionDetailDetail.as_view(), name='construction-detail-detail'),
+    path('designs/', DesignList.as_view(), name='design-list'),
+    path('designs/<int:id>/', DesignDetail.as_view(), name='design-detail'),
+    path('minutes_of_meeting/', MinutesOfMeetingList.as_view(), name='minutes-of-meeting-list-create'),
+    path('minutes_of_meeting/<int:id>/', MinutesOfMeetingDetail.as_view(), name='minutes-of-meeting-detail'),
+
+]
