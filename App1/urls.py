@@ -26,5 +26,8 @@ urlpatterns = [
     path('designs/<int:id>/', DesignDetail.as_view(), name='design-detail'),
     path('minutes_of_meeting/', MinutesOfMeetingList.as_view(), name='minutes-of-meeting-list-create'),
     path('minutes_of_meeting/<int:id>/', MinutesOfMeetingDetail.as_view(), name='minutes-of-meeting-detail'),
-
+    path('admin_dashboard', admindashboard.as_view(), name="admin-dashboard" ),
+    path('team', ProjectTeam.as_view(), name="team" ),
+    path('team/<int:id>', Projectteamdetails.as_view(), name="teamdetails" ),
+   
 ]

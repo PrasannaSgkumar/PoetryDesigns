@@ -82,3 +82,8 @@ class MinutesofMeetingSerializer(serializers.ModelSerializer):
 class LoginSerializer(serializers.Serializer):
     username = serializers.CharField()
     password = serializers.CharField()
+
+class ProjectTeamSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Projectteam
+        fields = '__all__'

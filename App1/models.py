@@ -132,12 +132,16 @@ class Project(models.Model):
     ]
 
     project_name = models.CharField(max_length=255)
+    project_id=models.CharField(max_length=255, null=True, blank=True)
+    design_phase_completed=models.BooleanField(default=False)
+    construction_phase_completed=models.BooleanField(default=False)
+    
     project_type = models.CharField(max_length=100)
     project_location = models.CharField(max_length=255)
     project_description = models.TextField(blank=True, null=True)
     project_dimensions = models.CharField(max_length=100, blank=True, null=True)
 
-    customer = models.ForeignKey(Clients, on_delete=models.CASCADE)
+   
     type_of_house = models.ForeignKey(TypesOfHouse, on_delete=models.SET_NULL, null=True, blank=True)
 
     designed_file = models.FileField(upload_to='designs/', blank=True, null=True)
@@ -185,13 +189,14 @@ class ConstructionDetail(models.Model):
     project = models.ForeignKey(Project, on_delete=models.CASCADE)
     stage = models.ForeignKey(ConstructionStage, on_delete=models.CASCADE)
     is_completed = models.BooleanField(default=False)
-    completed_date = models.DateField(blank=True, null=True)
+    start_date=models.DateField(blank=True, null=True)
+    end_date = models.DateField(blank=True, null=True)
     payment_amount = models.DecimalField(max_digits=15, decimal_places=2, blank=True, null=True)
     payment_status = models.CharField(max_length=50, default='Pending')  
     created_at = models.DateTimeField(default=timezone.now)
     updated_at = models.DateTimeField(auto_now=True)
     payment_date = models.DateField(blank=True, null=True)
-    type_of_payment = models.CharField(max_length=50)
+   
 
     def __str__(self):
         return f"Stage: {self.stage.name} | Project: {self.project.name}"
@@ -225,3 +230,19 @@ class Design(models.Model):
 
     def __str__(self):
         return f"Design for Project: {self.project.name} by Customer: {self.customer.name}"
+    
+class Projectteam(models.Model):
+    project = models.ForeignKey(Project, on_delete=models.CASCADE)
+    team_member = models.ForeignKey(users, on_delete=models.CASCADE)
+    role = models.CharField(max_length=50, null=True, blank=True)
+    
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+
+class Project_Documents(models.Model):
+    project = models.ForeignKey(Project, on_delete=models.CASCADE)
+    document = models.FileField()
+    name = models.CharField(max_length=255, null=False, blank=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)

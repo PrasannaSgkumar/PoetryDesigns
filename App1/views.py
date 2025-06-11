@@ -190,6 +190,27 @@ class Roleview(APIView):
                 'message': f'Unexpected error: {str(e)}'
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+class admindashboard(APIView):
+    def get(self, request):
+        try:
+            user_count=users.objects.all().count()
+            project_count=Project.objects.all().count()
+            design_phase_count=Project.objects.filter(design_phase_completed=False, construction_phase_completed=False).count()
+            construction_phase_count=Project.objects.filter(design_phase_completed=True, construction_phase_completed=False).count()
+            return Response({
+                'status': 'success',
+                'user_count': user_count,
+                'project_count': project_count,
+                'design_phase_count': design_phase_count,
+                'construction_phase_count': construction_phase_count,
+            }, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({
+                'status': 'error',
+                'message': f'Error fetching dashboard data: {str(e)}'
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
     
 class Roledetailview(APIView):
     def get(self, request, id):
@@ -1059,3 +1080,109 @@ class MinutesOfMeetingDetail(APIView):
             return Response({"message": "Meeting deleted successfully"}, status=status.HTTP_204_NO_CONTENT)
 
 
+
+class ProjectTeam(APIView):
+    def get(self, request):
+        projectteam=Projectteam.objects.all()
+        serializer=ProjectTeamSerializer(projectteam,many=True)
+        return Response(serializer.data)
+    
+    def post(self, request):
+        try:
+            serializer = ProjectTeamSerializer(data=request.data)
+            if serializer.is_valid():
+                serializer.save()
+            else:
+                return Response({
+                    "status": "error",
+                    "message": "Invalid data",
+                    "errors": serializer.errors
+                }, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response({
+                "status": "error",
+                "message": str(e)
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        else:
+            return Response({
+                "status": "success",
+                "message": "Project team saved successfully",
+                "data": serializer.data
+            }, status=status.HTTP_201_CREATED)
+
+
+class Projectteamdetails(APIView):
+    def get(self, request, id):
+        try:
+            # Get the 'project' value from the request data
+            project = request.data.get('project')
+            
+            if not project:
+                return Response({
+                    "status": "error",
+                    "message": "Project ID is required"
+                }, status=status.HTTP_400_BAD_REQUEST)
+
+            
+            projectteam = Projectteam.objects.filter(project=project)
+            
+            if projectteam.exists():
+                serializer = ProjectTeamSerializer(projectteam, many=True)
+                return Response({
+                    "status": "success",
+                    "message": "Project team data fetched successfully",
+                    "data": serializer.data
+                }, status=status.HTTP_200_OK)
+            else:
+                return Response({
+                    "status": "error",
+                    "message": "No project team found for the given project ID"
+                }, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response({
+                "status": "error",
+                "message": str(e)
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
+    def put(self, request, id):
+        try:
+            # Get the 'project' value from the request data
+            project = request.data.get('project')
+            
+            if not project:
+                return Response({
+                    "status": "error",
+                    "message": "Project ID is required"
+                }, status=status.HTTP_400_BAD_REQUEST)
+            projectteam=get_object_or_404(Projectteam, id=id)
+            serializer=ProjectTeamSerializer(projectteam, data=request.data, partial=True)
+            if serializer.is_valid():
+                serializer.save()
+            else:
+                return Response({
+                    "status": "error",
+                    "message": "Invalid data",
+                    "errors": serializer.errors
+                }, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response({"status": "error", "message": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        else:
+            return Response({
+                "status": "success",
+                "message": "Porject Team updated successfully",
+                "data": serializer.data
+            })   
+
+    def delete(self, request, id):
+        try:
+            projectteam = Projectteam.objects.get(id=id)
+            projectteam.delete()
+            return Response({
+                "status": "success",
+                "message": "Porject Team deleted successfully"
+            })
+        except Exception as e:
+            return Response({
+                "status": "error",
+                "message": str(e)
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
