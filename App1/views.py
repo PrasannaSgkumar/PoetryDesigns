@@ -1114,38 +1114,23 @@ class ProjectTeam(APIView):
 class Projectteamdetails(APIView):
     def get(self, request, id):
         try:
-            # Get the 'project' value from the request data
-            project = request.data.get('project')
-            
-            if not project:
-                return Response({
-                    "status": "error",
-                    "message": "Project ID is required"
-                }, status=status.HTTP_400_BAD_REQUEST)
-
-            
-            projectteam = Projectteam.objects.filter(project=project)
-            
-            if projectteam.exists():
-                serializer = ProjectTeamSerializer(projectteam, many=True)
-                return Response({
-                    "status": "success",
-                    "message": "Project team data fetched successfully",
-                    "data": serializer.data
-                }, status=status.HTTP_200_OK)
-            else:
-                return Response({
-                    "status": "error",
-                    "message": "No project team found for the given project ID"
-                }, status=status.HTTP_404_NOT_FOUND)
-        except Exception as e:
+            projectteam = Projectteam.objects.get(id=id)
+            serializer = ProjectTeamSerializer(projectteam)
+            return Response({
+                "status": "success",
+                "message": "Project team data fetched successfully",
+                "data": serializer.data
+            }, status=status.HTTP_200_OK)
+        except Projectteam.DoesNotExist:
             return Response({
                 "status": "error",
-                "message": str(e)
-            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+                "message": "No project team found for the given ID"
+            }, status=status.HTTP_404_NOT_FOUND)
+
+
         
     def put(self, request, id):
-        try:
+        try:    
             # Get the 'project' value from the request data
             project = request.data.get('project')
             
