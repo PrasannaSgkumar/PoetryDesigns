@@ -2,6 +2,7 @@ from rest_framework import serializers
 from .models import *
 
 
+
 class DepartmentSerialisers(serializers.ModelSerializer):
     class Meta:
         model=Departments
@@ -87,3 +88,12 @@ class ProjectTeamSerializer(serializers.ModelSerializer):
     class Meta:
         model = Projectteam
         fields = '__all__'
+
+class RequestPasswordResetSerializer(serializers.Serializer):
+    username = serializers.CharField()
+
+
+class VerifyResetCodeSerializer(serializers.Serializer):
+    username = serializers.CharField()
+    code = serializers.CharField(max_length=6)
+    new_password = serializers.CharField(min_length=8)

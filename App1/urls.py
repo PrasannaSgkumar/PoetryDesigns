@@ -29,5 +29,7 @@ urlpatterns = [
     path('admin_dashboard', admindashboard.as_view(), name="admin-dashboard" ),
     path('team', ProjectTeam.as_view(), name="team" ),
     path('team/<int:id>', Projectteamdetails.as_view(), name="teamdetails" ),
+    path('request-reset-code/', SendPasswordResetCodeAPIView.as_view(), name='request-reset-code'),
+    path('verify-reset-code/', VerifyAndResetPasswordAPIView.as_view(), name='verify-reset-code'),
    
 ]

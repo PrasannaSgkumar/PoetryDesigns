@@ -143,3 +143,15 @@ SPECTACULAR_SETTINGS = {
     'VERSION': '1.0.0',
     'SERVE_INCLUDE_SCHEMA': False,  # Optional, to disable the schema view
 }
+
+
+
+# settings.py
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'  # or your mail server
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'prasannasgkumar@gmail.com'         # your email address
+EMAIL_HOST_PASSWORD = 'fmxw kjap zspl nxtv'   # NOT your Gmail password
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER

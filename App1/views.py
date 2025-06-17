@@ -72,6 +72,78 @@ class ClientLoginAPIView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
+from django.core.mail import send_mail
+from .models import users, PasswordResetCode
+from .serializers import RequestPasswordResetSerializer
+import random
+
+class SendPasswordResetCodeAPIView(APIView):
+    def post(self, request):
+        serializer = RequestPasswordResetSerializer(data=request.data)
+        if serializer.is_valid():
+            username = serializer.validated_data['username']
+
+            try:
+                user = users.objects.get(username=username)
+                code = f"{random.randint(100000, 999999)}"
+
+                # Save or update the code
+                PasswordResetCode.objects.update_or_create(
+                    username=username,
+                    defaults={'code': code}
+                )
+
+                # Send email
+                send_mail(
+                    subject='Your Password Reset Code',
+                    message=f'Your password reset verification code is {code}.',
+                    from_email='no-reply@example.com',
+                    recipient_list=[user.email],
+                    fail_silently=False,
+                )
+
+                return Response({'status': 'success', 'message': 'Verification code sent to email'}, status=status.HTTP_200_OK)
+
+            except users.DoesNotExist:
+                return Response({'status': 'error', 'message': 'Username not found'}, status=status.HTTP_404_NOT_FOUND)
+
+        return Response({'status': 'error', 'errors': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+
+
+
+class VerifyAndResetPasswordAPIView(APIView):
+    def post(self, request):
+        serializer = VerifyResetCodeSerializer(data=request.data)
+        if serializer.is_valid():
+            username = serializer.validated_data['username']
+            code = serializer.validated_data['code']
+            new_password = serializer.validated_data['new_password']
+
+            try:
+                otp_entry = PasswordResetCode.objects.get(username=username, code=code)
+
+                if otp_entry.is_expired():
+                    return Response({'status': 'error', 'message': 'Verification code expired'}, status=status.HTTP_400_BAD_REQUEST)
+
+                user = users.objects.get(username=username)
+                user.password = make_password(new_password)
+                user.save()
+
+                otp_entry.delete()
+
+                return Response({'status': 'success', 'message': 'Password reset successful'}, status=status.HTTP_200_OK)
+
+            except PasswordResetCode.DoesNotExist:
+                return Response({'status': 'error', 'message': 'Invalid verification code'}, status=status.HTTP_400_BAD_REQUEST)
+            except users.DoesNotExist:
+                return Response({'status': 'error', 'message': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
+
+        return Response({'status': 'error', 'errors': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+
+
 
 class departmentview(APIView):
     def get(self, request):
