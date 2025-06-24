@@ -1,9 +1,8 @@
 from django.urls import path
 from .views import *
 urlpatterns = [
-    path('login/superadmin/', SuperAdminLoginAPIView.as_view(), name='superadmin-login'),
-    path('login/user/', UserLoginAPIView.as_view(), name='user-login'),
-    path('login/client/', ClientLoginAPIView.as_view(), name='client-login'),
+    path('login/', UnifiedLoginAPIView.as_view(), name='login'),
+    
     path('departments/', departmentview.as_view(), name="department" ),
     path('department/<int:id>/', departmentdetailview.as_view(), name="department-detail"),
     path('roles/', Roleview.as_view(), name="roles" ),
@@ -31,5 +30,6 @@ urlpatterns = [
     path('team/<int:id>', Projectteamdetails.as_view(), name="teamdetails" ),
     path('request-reset-code/', SendPasswordResetCodeAPIView.as_view(), name='request-reset-code'),
     path('verify-reset-code/', VerifyAndResetPasswordAPIView.as_view(), name='verify-reset-code'),
+    path('client/dashboard/<int:client_id>/', ClientDashboardAPIView.as_view(), name='client-dashboard'),
    
 ]

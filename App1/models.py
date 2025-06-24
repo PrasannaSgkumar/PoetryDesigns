@@ -135,7 +135,7 @@ class Project(models.Model):
     project_id=models.CharField(max_length=255, null=True, blank=True)
     design_phase_completed=models.BooleanField(default=False)
     construction_phase_completed=models.BooleanField(default=False)
-    
+    customer=models.ForeignKey(Clients, on_delete=models.CASCADE, null=True, blank=True)
     project_type = models.CharField(max_length=100)
     project_location = models.CharField(max_length=255)
     project_description = models.TextField(blank=True, null=True)

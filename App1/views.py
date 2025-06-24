@@ -7,36 +7,18 @@ from .models import *
 from .serializers import *
 from django.shortcuts import get_object_or_404
 from rest_framework.parsers import MultiPartParser
+from rest_framework.permissions import IsAuthenticated
 
 
-class SuperAdminLoginAPIView(APIView):
+class UnifiedLoginAPIView(APIView):
     def post(self, request):
         serializer = LoginSerializer(data=request.data)
         if serializer.is_valid():
             identifier = serializer.validated_data['username']
             password = serializer.validated_data['password']
-            try:
-                admin = SuperAdmin.objects.filter(username=identifier).first()
-                if admin and check_password(password, admin.password):
-                    return Response({
-                        'status': 'success',
-                        'user_type': 'SuperAdmin',
-                        'user_id': admin.id,
-                        'name': f"{admin.first_name} {admin.last_name}"
-                    })
-                return Response({'status': 'error', 'message': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
-            except Exception as e:
-                return Response({'status': 'error', 'message': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-
-class UserLoginAPIView(APIView):
-    def post(self, request):
-        serializer = LoginSerializer(data=request.data)
-        if serializer.is_valid():
-            identifier = serializer.validated_data['username']
-            password = serializer.validated_data['password']
             try:
+                
                 user = users.objects.filter(username=identifier).first()
                 if user and check_password(password, user.password):
                     return Response({
@@ -45,19 +27,8 @@ class UserLoginAPIView(APIView):
                         'user_id': user.id,
                         'name': f"{user.first_name} {user.last_name}"
                     })
-                return Response({'status': 'error', 'message': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
-            except Exception as e:
-                return Response({'status': 'error', 'message': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-
-class ClientLoginAPIView(APIView):
-    def post(self, request):
-        serializer = LoginSerializer(data=request.data)
-        if serializer.is_valid():
-            identifier = serializer.validated_data['username']
-            password = serializer.validated_data['password']
-            try:
+                # Try clients
                 client = Clients.objects.filter(username=identifier).first()
                 if client and check_password(password, client.password):
                     return Response({
@@ -66,10 +37,25 @@ class ClientLoginAPIView(APIView):
                         'user_id': client.id,
                         'name': f"{client.first_name} {client.last_name}"
                     })
+
+                # Try super admins
+                admin = SuperAdmin.objects.filter(username=identifier).first()
+                if admin and check_password(password, admin.password):
+                    return Response({
+                        'status': 'success',
+                        'user_type': 'SuperAdmin',
+                        'user_id': admin.id,
+                        'name': f"{admin.first_name} {admin.last_name}"
+                    })
+
+                # If none matched
                 return Response({'status': 'error', 'message': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
+
             except Exception as e:
                 return Response({'status': 'error', 'message': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
 
 from rest_framework.views import APIView
@@ -1243,3 +1229,104 @@ class Projectteamdetails(APIView):
                 "status": "error",
                 "message": str(e)
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+
+class ClientDashboardAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+    
+
+    def get(self, request, client_id):
+        try:
+            
+            client = Clients.objects.get(id=client_id)
+        except Clients.DoesNotExist:
+            return Response({'error': 'Client not found'}, status=404)
+        
+        projects = Project.objects.filter(customer=client)
+
+
+        project_data = []
+        for project in projects:
+            
+            construction_details = ConstructionDetail.objects.filter(project=project).order_by('stage__sequence')
+            designs = Design.objects.filter(project=project, customer=client)
+            documents = Project_Documents.objects.filter(project=project)
+            mom_notes = MinutesofMeeting.objects.filter(project_id=project)
+
+            project_data.append({
+                'project_id': project.id,
+                'project_name': project.project_name,
+                'project_type': project.project_type,
+                'project_location': project.project_location,
+                'type_of_house': project.type_of_house.name if project.type_of_house else None,
+                'start_date': project.start_date,
+                'end_date': project.end_date,
+                'status': project.status,
+                'original_contract_amount': project.original_contract_amount,
+                'approved_changes_amount': project.approved_changes_amount,
+                'current_total_amount': project.current_total_amount,
+                'design_phase_completed': project.design_phase_completed,
+                'construction_phase_completed': project.construction_phase_completed,
+                
+                'construction_progress': [
+                    {
+                        'stage_name': detail.stage.name,
+                        'sequence': detail.stage.sequence,
+                        'is_completed': detail.is_completed,
+                        'start_date': detail.start_date,
+                        'end_date': detail.end_date,
+                        'payment_amount': detail.payment_amount,
+                        'payment_status': detail.payment_status,
+                        'payment_date': detail.payment_date,
+                    }
+                    for detail in construction_details
+                ],
+
+                'designs': [
+                    {
+                        'design_2D': design.design_2D.url,
+                        'design_3D': design.design_3D.url,
+                        'is_new_design': design.is_new_design,
+                    }
+                    for design in designs
+                ],
+
+                'documents': [
+                    {
+                        'name': doc.name,
+                        'url': doc.document.url,
+                        'created_at': doc.created_at,
+                    }
+                    for doc in documents
+                ],
+
+                'mom_notes': [
+                    {
+                        'meeting_title': mom.meeting_title,
+                        'datetime': mom.datetime,
+                        'attended_by': mom.attended_by,
+                        'attachment': mom.attachment.url if mom.attachment else None,
+                        'notes': mom.notes,
+                        'type': mom.type
+                    }
+                    for mom in mom_notes
+                ],
+
+                'upcoming_milestones': [
+                    {
+                        'stage_name': detail.stage.name,
+                        'start_date': detail.start_date,
+                        'end_date': detail.end_date,
+                    }
+                    for detail in construction_details.filter(is_completed=False)[:2]
+                ]
+            })
+
+        response_data = {
+            'client_name': f"{client.first_name} {client.last_name}",
+            'total_projects': projects.count(),
+            'projects': project_data,
+        }
+
+        return Response(response_data)
