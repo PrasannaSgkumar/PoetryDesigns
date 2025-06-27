@@ -97,3 +97,15 @@ class VerifyResetCodeSerializer(serializers.Serializer):
     username = serializers.CharField()
     code = serializers.CharField(max_length=6)
     new_password = serializers.CharField(min_length=8)
+
+
+
+class ProjectDocumentsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Project_Documents
+        fields = ['id', 'project', 'document', 'name', 'created_at', 'updated_at']
+
+class ChangeOfRequestSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ChangeOfRequest
+        fields = '__all__'

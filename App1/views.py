@@ -1,3 +1,4 @@
+from django.http import Http404
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
@@ -1330,3 +1331,98 @@ class ClientDashboardAPIView(APIView):
         }
 
         return Response(response_data)
+    
+
+class ProjectDocumentListCreateAPIView(APIView):
+    def get(self, request):
+        documents = Project_Documents.objects.all()
+        serializer = ProjectDocumentsSerializer(documents, many=True)
+        return Response(serializer.data)
+
+    def post(self, request):
+        serializer = ProjectDocumentsSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({
+                'message': 'Document saved successfully',
+                'data': serializer.data
+            }, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class ProjectDocumentDetailAPIView(APIView):
+    def get_object(self, id):
+        try:
+            return Project_Documents.objects.get(id=id)
+        except Project_Documents.DoesNotExist:
+            return Response({
+                "status": "error",
+                "message": "No Document found"
+            }, status=status.HTTP_404_NOT_FOUND)
+
+    def get(self, request, id):
+        document = self.get_object(id)
+        serializer = ProjectDocumentsSerializer(document)
+        return Response(serializer.data)
+
+    def put(self, request, id):
+        document = self.get_object(id)
+        serializer = ProjectDocumentsSerializer(document, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({
+                'message': 'Document updated successfully',
+                'data': serializer.data
+            })
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request, id):
+        document = self.get_object(id)
+        document.delete()
+        return Response({'message': 'Document deleted successfully'}, status=status.HTTP_204_NO_CONTENT)
+    
+
+class ChangeOfRequestListCreateAPIView(APIView):
+    def get(self, request):
+        changes = ChangeOfRequest.objects.all()
+        serializer = ChangeOfRequestSerializer(changes, many=True)
+        return Response(serializer.data)
+
+    def post(self, request):
+        serializer = ChangeOfRequestSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({
+                'message': 'Change of Request saved successfully',
+                'data': serializer.data
+            }, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class ChangeOfRequestDetailAPIView(APIView):
+    def get_object(self, id):
+        try:
+            return ChangeOfRequest.objects.get(id=id)
+        except ChangeOfRequest.DoesNotExist:
+            raise Http404
+
+    def get(self, request, id):
+        change = self.get_object(id)
+        serializer = ChangeOfRequestSerializer(change)
+        return Response(serializer.data)
+
+    def put(self, request, id):
+        change = self.get_object(id)
+        serializer = ChangeOfRequestSerializer(change, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({
+                'message': 'Change of Request updated successfully',
+                'data': serializer.data
+            })
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request, id):
+        change = self.get_object(id)
+        change.delete()
+        return Response({'message': 'Change of Request deleted successfully'}, status=status.HTTP_204_NO_CONTENT)

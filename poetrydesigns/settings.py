@@ -157,7 +157,3 @@ EMAIL_HOST_PASSWORD = 'fmxw kjap zspl nxtv'   # NOT your Gmail password
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
 
-AUTHENTICATION_BACKENDS = [
-    'django.contrib.auth.backends.ModelBackend',
-    'App1.backends.ClientBackend',
-]

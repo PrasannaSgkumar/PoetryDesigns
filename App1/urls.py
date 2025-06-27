@@ -31,5 +31,9 @@ urlpatterns = [
     path('request-reset-code/', SendPasswordResetCodeAPIView.as_view(), name='request-reset-code'),
     path('verify-reset-code/', VerifyAndResetPasswordAPIView.as_view(), name='verify-reset-code'),
     path('client/dashboard/<int:client_id>/', ClientDashboardAPIView.as_view(), name='client-dashboard'),
+    path('api/project-documents/', ProjectDocumentListCreateAPIView.as_view(), name='project-documents-list-create'),
+    path('api/project-documents/<int:id>/', ProjectDocumentDetailAPIView.as_view(), name='project-documents-detail'),
+    path('api/change-requests/', ChangeOfRequestListCreateAPIView.as_view(), name='change-request-list-create'),
+    path('api/change-requests/<int:id>/', ChangeOfRequestDetailAPIView.as_view(), name='change-request-detail'),
    
 ]
