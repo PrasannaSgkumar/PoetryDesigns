@@ -1367,7 +1367,7 @@ class ProjectDocumentDetailAPIView(APIView):
 
     def put(self, request, id):
         document = self.get_object(id)
-        serializer = ProjectDocumentsSerializer(document, data=request.data)
+        serializer = ProjectDocumentsSerializer(document, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
             return Response({
@@ -1413,7 +1413,7 @@ class ChangeOfRequestDetailAPIView(APIView):
 
     def put(self, request, id):
         change = self.get_object(id)
-        serializer = ChangeOfRequestSerializer(change, data=request.data)
+        serializer = ChangeOfRequestSerializer(change, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
             return Response({
